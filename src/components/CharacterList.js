@@ -1,38 +1,31 @@
-import React, {Component} from 'react'
+import React, {useEffect, useState} from 'react'
 import {fetchCharacters} from "../api/characters";
 import Loading from './Loading';
 import CharacterCard from './CharacterCard';
 
-class CharacterList extends Component {
+const CharacterList = props => {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            characters: []
-        }
-    }
+  const [state, setState] = useState({characters: []});
 
-    componentDidMount() {
-        fetchCharacters().then(resp => this.setState({...this.state, characters: resp.results}));
-    }
+  useEffect(() => {
+    fetchCharacters().then(resp => {
+      setState(s => ({...s, characters: resp.results}))
+    });
+  }, []);
 
-    render() {
+  if (!state.characters.length) {
+    return <Loading/>
+  }
 
-        if (!this.state.characters.length) {
-            return (
-                <Loading/>
-            )
-        }
+  const {characters} = state;
+  const url = props.match.url;
 
-        const {characters} = this.state;
-        const url = this.props.match.url;
+  return (
+    <div className='p-8 max-w-3xl m-auto'>
+      {characters.map(character => <CharacterCard key={character.id} character={character} url={url}/>)}
+    </div>
+  )
 
-        return (
-            <div className='p-8 max-w-3xl m-auto'>
-                {characters.map(character => <CharacterCard key={character.id} character={character} url={url}/>)}
-            </div>
-        )
-    }
-}
+};
 
 export default CharacterList
